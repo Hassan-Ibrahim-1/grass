@@ -6,9 +6,19 @@ public:
     void update() override;
     void cleanup() override;
 
+    uint ngrass = 1000;
+    std::vector<GameObject*> grass;
+
     Cube& ground = *new Cube;
     PointLight& light = *new PointLight;
 
-    GameObject& grass = *new GameObject;
+    float mult = 0.0220f;
+
+    /*GameObject& grass = *new GameObject;*/
+    
+    GameObject& create_grass_blade();
+    void update_grass();
+    void create_random_grass();
+    glm::vec3 random_point_on_ground();
 };
 
