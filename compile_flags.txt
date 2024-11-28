@@ -1,0 +1,12 @@
+-Idependencies/glfw/include
+-Idependencies/glad/include
+-Idependencies/glm/
+-Idependencies/glad/include
+-Idependencies/assimp/include
+-Idependencies/stb/
+-std=c++17
+-I./dependencies/imgui
+-I./dependencies/imgui/backends
+-I./dependencies/noise/
+-Idependencies/libjpeg/
+
