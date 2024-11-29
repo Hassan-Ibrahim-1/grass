@@ -24,7 +24,7 @@ void App::init() {
 }
 
 void App::update() {
-    /*update_grass();*/
+    update_grass();
 
     if (engine::cursor_enabled) {
         ImGui::Begin("scene");

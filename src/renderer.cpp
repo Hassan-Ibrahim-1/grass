@@ -222,6 +222,9 @@ void Renderer::render_lines() {
 }
 
 void Renderer::render_game_objects() {
+    send_light_data(shaders.light_mesh);
+    send_light_data(shaders.light_textured_mesh);
+
     for (GameObject* obj : main_scene->game_objects) {
         if (obj->hidden) {
             continue;
@@ -261,7 +264,7 @@ void Renderer::render_game_objects() {
                             )
                         )
                     );
-                    send_light_data(*shader);
+                    /*send_light_data(*shader);*/
                 }
                 for (int i = 0; i < obj->material.diffuse_texture_count(); i++) {
                     // TODO: is this GL_TEXTURE0 and GL_TEXTURE1 stuff right?
@@ -303,7 +306,7 @@ void Renderer::render_game_objects() {
                             )
                         )
                     );
-                    send_light_data(*shader);
+                    /*send_light_data(*shader);*/
                 }
             }
         }
