@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include "app.hpp"
 #include "utils.hpp"
 
@@ -23,7 +24,7 @@ void App::init() {
 }
 
 void App::update() {
-    update_grass();
+    /*update_grass();*/
 
     if (engine::cursor_enabled) {
         ImGui::Begin("scene");
@@ -34,9 +35,9 @@ void App::update() {
 
         ImGui::Begin("grass");
         ImGui::DragFloat("mult", &mult, 0.001);
-        for (size_t i = 0; i < grass.size(); i++) {
-            utils::imgui_transform("grass " + std::to_string(i), grass[i]->transform);
-        }
+        /*for (size_t i = 0; i < grass.size(); i++) {*/
+        /*    utils::imgui_transform("grass " + std::to_string(i), grass[i]->transform);*/
+        /*}*/
         ImGui::End();
     }
 }
@@ -95,6 +96,7 @@ void App::update_grass() {
     float offset = mult * cos(glfwGetTime());
     for (auto blade : grass) {
         auto& mesh = blade->meshes.front();
+        /*float random = 0;*/
         float random = utils::random_float(-0.01, 0.01);
         mesh.vertices[0].position.x += offset + random;
         mesh.vertices[3].position.x += offset + random;
@@ -102,8 +104,12 @@ void App::update_grass() {
         mesh.vertices[4].position.x = (mesh.vertices[3].position.x + mesh.vertices[0].position.x);
         /*mesh.vertices[3].position.z += offset;*/
         /*mesh.vertices[0].position.z += offset;*/
-        mesh.delete_buffers();
-        mesh.create_buffers();
+
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, mesh.vertices.size() * sizeof(Vertex), mesh.vertices.data());
+
+        /*mesh.delete_buffers();*/
+        /*mesh.create_buffers();*/
     }
 }
 
