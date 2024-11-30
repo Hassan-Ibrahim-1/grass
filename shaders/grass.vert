@@ -2,20 +2,22 @@
 
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
-// layout (location = 2) in vec2 a_tex_coord;
+layout (location = 2) in mat4 a_tex_coords;
+layout (location = 3) in mat4 a_model;
+layout (location = 7) in mat4 a_inverse_model;
 
 out vec3 normal;
 out vec3 frag_pos; // fragment position
 
 // layout (std140) uniform matrices {
-    // mat4 projection;
-    // mat4 view;
+//     mat4 projection;
+//     mat4 view;
 // };
 
 // at most N grass
-#define MAX_GRASS 100
-uniform mat4 models[MAX_GRASS];
-uniform mat3 inverse_models[MAX_GRASS];
+// #define MAX_GRASS 100
+// uniform mat4 models[MAX_GRASS];
+// uniform mat3 inverse_models[MAX_GRASS];
 uniform mat4 projection;
 uniform mat4 view;
 uniform float time;
@@ -36,13 +38,15 @@ void main() {
         }
     }
 
-    vec3 position = (models[gl_InstanceID] * vec4(a_position, 1.0f)).xyz;
+    vec3 position = (a_model * vec4(a_position, 1.0f)).xyz;
     position.x += offset;
 
-    gl_Position = projection * view * vec4(position, 1);
+    gl_Position = vec4(position, 1);
+    // gl_Position = vec4(0, 0.1, 0, 1);
 
-    frag_pos = vec3(models[gl_InstanceID] * vec4(a_position, 1.0f));
-    normal = normalize(inverse_models[gl_InstanceID] * a_normal);
+    frag_pos = vec3(a_model * vec4(a_position, 1.0f));
+    mat3 inverse_model = mat3(a_inverse_model[0], a_inverse_model[1], a_inverse_model[2]);
+    normal = normalize(inverse_model * a_normal);
 }
 
 

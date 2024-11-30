@@ -1,3 +1,4 @@
+#include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include "app.hpp"
 #include "GLFW/glfw3.h"
@@ -63,13 +64,16 @@ void App::init() {
         1, 2, 3,
         0, 3, 4
     };
-    grass_mesh.create_buffers();
+    /*grass_mesh.create_buffers();*/
     grass_mesh.draw_command.mode = DrawCommandMode::TRIANGLES;
     grass_mesh.draw_command.type = DrawCommandType::DRAW_ELEMENTS_INSTANCED;
     grass_mesh.draw_command.instance_count = ngrass;
 
+    renderer.add_shader(grass_shader);
+
     create_random_grass();
-    send_transform_data();
+    init_instance_vbo();
+    /*send_transform_data();*/
 }
 
 void App::update() {
@@ -102,6 +106,7 @@ Transform& App::create_grass_blade() {
     return grass_transforms.back();
 }
 
+
 void App::render_grass() {
     grass_shader.use();
     renderer.send_light_data(grass_shader);
@@ -110,7 +115,16 @@ void App::render_grass() {
     grass_shader.set_float("time", glfwGetTime());
     grass_shader.set_vec3("material.color", grass_color.clamped_vec3());
     grass_shader.set_float("material.shininess", 32);
-    renderer.render_mesh(grass_mesh);
+    glBindVertexArray(grass_mesh.vao());
+    glDrawElementsInstanced(
+        GL_TRIANGLES,
+        grass_mesh.draw_command.vertex_count,
+        GL_UNSIGNED_INT,
+        0,
+        2000
+    );
+    glBindVertexArray(0);
+    /*renderer.render_mesh(grass_mesh);*/
 }
 
 void App::update_grass() {
@@ -141,6 +155,62 @@ void App::create_random_grass() {
         blade.scale.x = 0.1f;
         /*blade.rotation.yaw = utils::random_float(0, 10);*/
     }
+}
+
+void App::init_instance_vbo() {
+    std::vector<glm::mat4> matricies;
+
+    for (uint i = 0; i < ngrass; i++) {
+        auto model = grass_transforms[i].get_mat4();
+        matricies.push_back(model);
+        matricies.push_back(utils::inverse_model(model));
+    }
+
+    grass_mesh.create_buffers();
+
+    glBindVertexArray(grass_mesh.vao());
+    
+    glGenBuffers(1, &instance_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+    glBufferData(GL_ARRAY_BUFFER, ngrass * sizeof(glm::mat4), &matricies[0], GL_STATIC_DRAW);
+
+    auto v4s = sizeof(glm::vec4);
+
+    // Model - binds to 3, 4, 5, 6
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)0);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(1*v4s));
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(2*v4s));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(3*v4s));
+
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+
+    // Inverse
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(4*v4s));
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(5*v4s));
+    glEnableVertexAttribArray(9);
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(6*v4s));
+    glEnableVertexAttribArray(10);
+    glVertexAttribPointer(10, 4, GL_FLOAT, GL_FALSE, 8*v4s, (void*)(7*v4s));
+
+    glVertexAttribDivisor(7, 1);
+    glVertexAttribDivisor(8, 1);
+    glVertexAttribDivisor(9, 1);
+    glVertexAttribDivisor(10, 1);
+
+    glBindVertexArray(0);
+
+    grass_mesh.draw_command.mode = DrawCommandMode::TRIANGLES;
+    grass_mesh.draw_command.type = DrawCommandType::DRAW_ELEMENTS_INSTANCED;
+    grass_mesh.draw_command.instance_count = ngrass;
 }
 
 void App::send_transform_data() {

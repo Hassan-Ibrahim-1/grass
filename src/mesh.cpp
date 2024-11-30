@@ -68,6 +68,7 @@ void Mesh::create_buffers() {
 
     glBindVertexArray(0);
 
+    // Should probably be done in the constructor
     draw_command.type = DrawCommandType::DRAW_ELEMENTS;
     draw_command.mode = DrawCommandMode::TRIANGLES;
     draw_command.vertex_count = indices.size();

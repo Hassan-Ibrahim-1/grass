@@ -396,7 +396,7 @@ void Renderer::render_mesh(const Mesh& mesh) {
         );
         break;
     default:
-        ERROR("Invalid draw command");
+        /*ERROR("Invalid draw command");*/
         break;
 
     }
