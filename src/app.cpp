@@ -28,6 +28,8 @@ void App::init() {
         fs::shader_path("light_mesh.frag")
     );
 
+    /*renderer.add_shader(grass_shader);*/
+
     grass_mesh.vertices = {
         {
             glm::vec3(0.5f, 0.5f, 0.0f),
@@ -61,10 +63,10 @@ void App::init() {
         1, 2, 3,
         0, 3, 4
     };
+    grass_mesh.create_buffers();
     grass_mesh.draw_command.mode = DrawCommandMode::TRIANGLES;
     grass_mesh.draw_command.type = DrawCommandType::DRAW_ELEMENTS_INSTANCED;
     grass_mesh.draw_command.instance_count = ngrass;
-    grass_mesh.create_buffers();
 
     create_random_grass();
     send_transform_data();
@@ -103,6 +105,8 @@ Transform& App::create_grass_blade() {
 void App::render_grass() {
     grass_shader.use();
     renderer.send_light_data(grass_shader);
+    grass_shader.set_mat4("projection", camera.get_perspective_matrix());
+    grass_shader.set_mat4("view", camera.get_view_matrix());
     grass_shader.set_float("time", glfwGetTime());
     grass_shader.set_vec3("material.color", grass_color.clamped_vec3());
     grass_shader.set_float("material.shininess", 32);

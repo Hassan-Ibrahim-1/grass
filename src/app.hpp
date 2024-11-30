@@ -6,7 +6,7 @@ public:
     void update() override;
     void cleanup() override;
 
-    uint ngrass = 10;
+    uint ngrass = 20;
     Mesh grass_mesh;
     // TODO: make this an array
     std::vector<Transform> grass_transforms;
