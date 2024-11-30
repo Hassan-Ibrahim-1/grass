@@ -6,7 +6,7 @@ public:
     void update() override;
     void cleanup() override;
 
-    uint ngrass = 10;
+    uint ngrass = 5000;
     Mesh grass_mesh;
     uint instance_vbo = 0;
     uint instance_inverse_model_vbo = 0;

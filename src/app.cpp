@@ -113,16 +113,16 @@ void App::render_grass() {
     grass_shader.set_float("time", glfwGetTime());
     grass_shader.set_vec3("material.color", grass_color.clamped_vec3());
     grass_shader.set_float("material.shininess", 32);
-    glBindVertexArray(grass_mesh.vao());
-    glDrawElementsInstanced(
-        GL_TRIANGLES,
-        grass_mesh.draw_command.vertex_count,
-        GL_UNSIGNED_INT,
-        0,
-        2000
-    );
-    glBindVertexArray(0);
-    /*renderer.render_mesh(grass_mesh);*/
+    /*glBindVertexArray(grass_mesh.vao());*/
+    /*glDrawElementsInstanced(*/
+    /*    GL_TRIANGLES,*/
+    /*    grass_mesh.draw_command.vertex_count,*/
+    /*    GL_UNSIGNED_INT,*/
+    /*    0,*/
+    /*    ngrass*/
+    /*);*/
+    /*glBindVertexArray(0);*/
+    renderer.render_mesh(grass_mesh);
 }
 
 void App::update_grass() {
