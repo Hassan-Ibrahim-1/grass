@@ -64,5 +64,7 @@ void write_jpeg(const char* filename, u8* pixel_data, uint width, uint height);
 void print_color(const Color& color);
 void print_color(const Color3& color);
 
+glm::mat4 inverse_model(const glm::mat4& model);
+
 }
 

@@ -5,6 +5,8 @@
 
 #include "utils.hpp"
 #include "engine.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/matrix.hpp"
 #include "jpeglib.h"
 #include "input.hpp"
 
@@ -81,6 +83,7 @@ bool utils::imgui_rect(const std::string& name, Rect& rect) {
 }
 
 bool utils::imgui_cube(const std::string& name, Cube& cube) {
+    ImGui::Checkbox((name + " hidden").c_str(), &cube.hidden);
     imgui_color_edit3(name + " color", cube.material.color);
     return imgui_transform(name, cube.transform);
 }
@@ -318,5 +321,9 @@ void utils::print_color(const Color& color) {
 }
 void utils::print_color(const Color3& color) {
     printf("r: %d, g: %d, b: %d\n", color.r, color.g, color.b);
+}
+
+glm::mat4 utils::inverse_model(const glm::mat4& model) {
+    return glm::transpose(glm::inverse(model));
 }
 

@@ -61,7 +61,12 @@ void Shader::load_shaders() {
     glLinkProgram(ID);
     int success = 0;
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
-    ASSERT(success, "Bad shader program link\n");
+    if (!success) {
+        int tmp = 512;
+        glGetProgramInfoLog(ID, tmp, &tmp, _error);
+        ERROR("Shader linking error: %s", _error);
+    }
+    /*ASSERT(success, "Bad shader program link\n");*/
            
     _shader_loaded = true;
 }

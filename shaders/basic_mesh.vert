@@ -4,7 +4,7 @@ layout (location = 0) in vec3 a_position;
 // layout (location = 1) in vec3 a_normal;
 // layout (location = 2) in vec2 a_tex_coord;
 
-layout (std140) uniform Matrices {
+layout (std140) uniform matrices {
     mat4 projection;
     mat4 view;
 };

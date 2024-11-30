@@ -83,6 +83,8 @@ public:
     uint sphere_vao();
     const DrawCommand& sphere_mesh_draw_command();
 
+    void send_light_data(Shader& shader);
+
 private:
     // NOTE: Everything here gets copied
     std::vector<Point> _points;
@@ -210,7 +212,6 @@ private:
     void update_vbos();
 
     void init_shaders();
-    void send_light_data(Shader& shader);
 
     void render_points();
     void render_lines();

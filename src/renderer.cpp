@@ -10,6 +10,7 @@
 #include "draw_command.hpp"
 #include "engine.hpp"
 #include "fs.hpp"
+#include "utils.hpp"
 
 Renderer::Renderer(Camera &main_camera, Scene &scene)
     : main_camera(&main_camera), main_scene(&scene) {
@@ -224,11 +225,12 @@ void Renderer::render_game_objects() {
                     shader->set_float("material.shininess", obj->material.shininess);
                     shader->set_mat3(
                         "inverse_model",
-                        glm::transpose(
-                            glm::inverse(
-                                model
-                            )
-                        )
+                        utils::inverse_model(model)
+                        /*glm::transpose(*/
+                        /*    glm::inverse(*/
+                        /*        model*/
+                        /*    )*/
+                        /*)*/
                     );
                     /*send_light_data(*shader);*/
                 }
@@ -266,11 +268,12 @@ void Renderer::render_game_objects() {
                     shader->set_float("material.shininess", obj->material.shininess);
                     shader->set_mat3(
                         "inverse_model",
-                        glm::transpose(
-                            glm::inverse(
-                                model
-                            )
-                        )
+                        utils::inverse_model(model)
+                        /*glm::transpose(*/
+                        /*    glm::inverse(*/
+                        /*        model*/
+                        /*    )*/
+                        /*)*/
                     );
                     /*send_light_data(*shader);*/
                 }
