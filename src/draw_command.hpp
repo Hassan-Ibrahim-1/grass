@@ -6,7 +6,9 @@ using uint = unsigned int;
 
 enum class DrawCommandType {
     DRAW_ARRAYS,
-    DRAW_ELEMENTS
+    DRAW_ELEMENTS,
+    DRAW_ARRAYS_INSTANCED,
+    DRAW_ELEMENTS_INSTANCED,
 };
 
 enum class DrawCommandMode {
@@ -29,6 +31,7 @@ namespace draw_command_utils {
 struct DrawCommand {
     DrawCommandType type;
     DrawCommandMode mode;
-    size_t count = 0;
+    size_t vertex_count = 0;
+    uint instance_count = 0;
 };
 

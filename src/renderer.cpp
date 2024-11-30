@@ -2,19 +2,23 @@
 #include <cstddef>
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <cmath>
+#include <iterator>
 #include "renderer.hpp"
 #include "debug.hpp"
+#include "draw_command.hpp"
 #include "engine.hpp"
 #include "fs.hpp"
 
 Renderer::Renderer(Camera &main_camera, Scene &scene)
     : main_camera(&main_camera), main_scene(&scene) {
-  generate_circle_vertices();
-  init_models();
-  init_vbos();
-  init_vaos();
-  init_shaders();
+    generate_circle_vertices();
+    init_models();
+    init_vbos();
+    init_vaos();
+    init_shaders();
+    init_ubos();
 }
 
 Renderer::~Renderer() {
@@ -46,6 +50,9 @@ void Renderer::draw_line(Point p1, Point p2) {
 
 void Renderer::add_shader(Shader& shader) {
     _user_shaders.push_back(&shader);
+
+    uint index = glGetUniformBlockIndex(shaders.point.ID, "Matrices");
+    glUniformBlockBinding(shaders.point.ID, index, 0);
 }
 
 void Renderer::reload_shaders() {
@@ -66,6 +73,7 @@ void Renderer::reload_shaders() {
     shaders.basic_textured_mesh.reload();
     shaders.light_mesh.reload();
     shaders.light_textured_mesh.reload();
+    shaders.skybox.reload();
     shaders.depth.reload();
 
     for (Shader* shader : _user_shaders) {
@@ -74,65 +82,17 @@ void Renderer::reload_shaders() {
 }
 
 void Renderer::set_matrices(const glm::mat4& view, const glm::mat4& projection) {
-    shaders.point.use();
-    shaders.point.set_mat4("view", view);
-    shaders.line.use();
-    shaders.line.set_mat4("view", view);
-    shaders.line.set_mat4("projection", projection);
-    /**/
-    /*shaders.rect.use();*/
-    /*shaders.rect.set_mat4("view", view);*/
-    /*shaders.rect.set_mat4("projection", projection);*/
-    /**/
-    /*shaders.circle.use();*/
-    /*shaders.circle.set_mat4("view", view);*/
-    /*shaders.circle.set_mat4("projection", projection);*/
-    /**/
-    /*shaders.cube.use();*/
-    /*shaders.cube.set_mat4("view", view);*/
-    /*shaders.cube.set_mat4("projection", projection);*/
-    /**/
-    /*shaders.sphere.use();*/
-    /*shaders.sphere.set_mat4("view", view);*/
-    /*shaders.sphere.set_mat4("projection", projection);*/
-    /**/
-    /*shaders.textured_rect.use();*/
-    /*shaders.textured_rect.set_mat4("view", view);*/
-    /*shaders.textured_rect.set_mat4("projection", projection);*/
-    /**/
-    /*shaders.textured_cube.use();*/
-    /*shaders.textured_cube.set_mat4("view", view);*/
-    /*shaders.textured_cube.set_mat4("projection", projection);*/
-    /**/
-    /*shaders.textured_sphere.use();*/
-    /*shaders.textured_sphere.set_mat4("view", view);*/
-    /*shaders.textured_sphere.set_mat4("projection", projection);*/
-    /**/
-    shaders.basic_mesh.use();
-    shaders.basic_mesh.set_mat4("view", view);
-    shaders.basic_mesh.set_mat4("projection", projection);
+    glBindBuffer(GL_UNIFORM_BUFFER, _matrices_ubo);
+    // Set this in the same order as declared in the shader
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    shaders.basic_textured_mesh.use();
-    shaders.basic_textured_mesh.set_mat4("view", view);
-    shaders.basic_textured_mesh.set_mat4("projection", projection);
-
-    shaders.light_mesh.use();
-    shaders.light_mesh.set_mat4("view", view);
-    shaders.light_mesh.set_mat4("projection", projection);
-
-    shaders.light_textured_mesh.use();
-    shaders.light_textured_mesh.set_mat4("view", view);
-    shaders.light_textured_mesh.set_mat4("projection", projection);
-
-    shaders.depth.use();
-    shaders.depth.set_mat4("view", view);
-    shaders.depth.set_mat4("projection", projection);
-
-    for (auto shader : _user_shaders) {
-        shader->use();
-        shader->set_mat4("view", view);
-        shader->set_mat4("projection", projection);
-    }
+    shaders.skybox.use();
+    // the casting removes the translation part of the matrix
+    // causing the skybox to not move.
+    shaders.skybox.set_mat4("view", glm::mat4(glm::mat3(view)));
+    shaders.skybox.set_mat4("projection", projection);
 }
 
 void Renderer::render() {
@@ -158,6 +118,7 @@ void Renderer::render() {
         glEnable(GL_STENCIL_TEST);
     }
     if (depth_view_enabled) {
+        shaders.depth.use();
         shaders.depth.set_float("near", main_camera->near);
         shaders.depth.set_float("far", main_camera->far);
     }
@@ -174,6 +135,11 @@ void Renderer::render() {
     render_lines();
     render_game_objects();
     render_lights();
+
+    // Draw skybox AFTER everything else has been drawn
+    if (main_scene->has_skybox()) {
+        render_skybox(main_scene->get_skybox());
+    }
 
     // Maybe use your own implementation of a dynamic array
     // clearing the array just sets the size to 0, capacity stays the same
@@ -372,15 +338,71 @@ void Renderer::render_lights() {
     }
 }
 
+void Renderer::render_skybox(Skybox& skybox) {
+    ASSERT(skybox.loaded(), "skybox not loaded");
+
+    if (wireframe_enabled) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    shaders.skybox.use();
+    glActiveTexture(GL_TEXTURE0);
+    shaders.skybox.set_int("skybox", 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
+
+    glDepthFunc(GL_LEQUAL);
+    glBindVertexArray(_cubes_vao);
+
+    Mesh mesh;
+    mesh.draw_command = Cube::cube_draw_command;
+    mesh.set_vao(_cubes_vao);
+    render_mesh(mesh);
+
+    glDepthFunc(GL_LESS);
+
+    if (wireframe_enabled) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+}
+
 void Renderer::render_mesh(const Mesh& mesh) {
     glBindVertexArray(mesh.vao());
     uint mode = draw_command_utils::draw_command_mode_to_gl_mode(mesh.draw_command.mode);
-    if (mesh.draw_command.type == DrawCommandType::DRAW_ARRAYS) {
-        glDrawArrays(mode, 0, mesh.draw_command.count);
+    switch (mesh.draw_command.type) {
+    case DrawCommandType::DRAW_ARRAYS:
+        glDrawArrays(mode, 0, mesh.draw_command.vertex_count);
+        break;
+    case DrawCommandType::DRAW_ELEMENTS:
+        glDrawElements(mode, mesh.draw_command.vertex_count, GL_UNSIGNED_INT, 0);
+        break;
+    case DrawCommandType::DRAW_ARRAYS_INSTANCED:
+        glDrawArraysInstanced(
+            mode,
+            0,
+            mesh.draw_command.vertex_count,
+            mesh.draw_command.instance_count
+        );
+        break;
+    case DrawCommandType::DRAW_ELEMENTS_INSTANCED:
+        glDrawElementsInstanced(
+            mode,
+            mesh.draw_command.vertex_count,
+            GL_UNSIGNED_INT,
+            0,
+            mesh.draw_command.instance_count
+        );
+        break;
+    default:
+        ERROR("Invalid draw command");
+        break;
+
     }
-    else if (mesh.draw_command.type == DrawCommandType::DRAW_ELEMENTS) {
-        glDrawElements(mode, mesh.draw_command.count, GL_UNSIGNED_INT, 0);
-    }
+    /*if (mesh.draw_command.type == DrawCommandType::DRAW_ARRAYS) {*/
+    /*    glDrawArrays(mode, 0, mesh.draw_command.vertex_count);*/
+    /*}*/
+    /*else if (mesh.draw_command.type == DrawCommandType::DRAW_ELEMENTS) {*/
+    /*    glDrawElements(mode, mesh.draw_command.vertex_count, GL_UNSIGNED_INT, 0);*/
+    /*}*/
     glBindVertexArray(0);
 }
 
@@ -507,6 +529,41 @@ void Renderer::init_vaos() {
     glEnableVertexAttribArray(1);
 }
 
+void Renderer::init_ubos() {
+    glGenBuffers(1, &_matrices_ubo);
+
+    // Only contains the projection and view matrices, in that order
+    glBindBuffer(GL_UNIFORM_BUFFER, _matrices_ubo);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, _matrices_ubo, 0, 2 * sizeof(glm::mat4));
+
+    // Bind shaders to _matrices_ubo
+    uint index = glGetUniformBlockIndex(shaders.point.ID, "Matrices");
+    glUniformBlockBinding(shaders.point.ID, index, 0);
+
+    index = glGetUniformBlockIndex(shaders.line.ID, "Matrices");
+    glUniformBlockBinding(shaders.line.ID, index, 0);
+
+    index = glGetUniformBlockIndex(shaders.basic_mesh.ID, "Matrices");
+    glUniformBlockBinding(shaders.basic_mesh.ID, index, 0);
+
+    index = glGetUniformBlockIndex(shaders.basic_textured_mesh.ID, "Matrices");
+    glUniformBlockBinding(shaders.basic_textured_mesh.ID, index, 0);
+
+    index = glGetUniformBlockIndex(shaders.light_mesh.ID, "Matrices");
+    glUniformBlockBinding(shaders.light_mesh.ID, index, 0);
+
+    index = glGetUniformBlockIndex(shaders.light_textured_mesh.ID, "Matrices");
+    glUniformBlockBinding(shaders.light_textured_mesh.ID, index, 0);
+
+    // No skybox because it needs a specular view matrix
+
+    index = glGetUniformBlockIndex(shaders.depth.ID, "Matrices");
+    glUniformBlockBinding(shaders.depth.ID, index, 0);
+}
+
 void Renderer::update_vbos() {
     glBindBuffer(GL_ARRAY_BUFFER, _lines_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * _line_points.size(), _line_points.data(), GL_DYNAMIC_DRAW);
@@ -541,6 +598,10 @@ void Renderer::init_shaders() {
     shaders.light_textured_mesh.load(
         fs::shader_path("light_textured_mesh.vert"),
         fs::shader_path("light_textured_mesh.frag")
+    );
+    shaders.skybox.load(
+        fs::shader_path("skybox.vert"),
+        fs::shader_path("skybox.frag")
     );
     shaders.depth.load(fs::shader_path("depth.vert"), fs::shader_path("depth.frag"));
 }

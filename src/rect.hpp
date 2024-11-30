@@ -42,7 +42,7 @@ struct Rect : public GameObject {
         else {
             Mesh& mesh = meshes.front();
             mesh.draw_command.mode = DrawCommandMode::LINE_LOOP;
-            mesh.draw_command.count = 4;
+            mesh.draw_command.vertex_count = 4;
             mesh.draw_command.type = DrawCommandType::DRAW_ARRAYS;
 
         }
@@ -51,9 +51,9 @@ struct Rect : public GameObject {
     bool is_filled() {
         ASSERT(!meshes.empty(), "rect mesh has not been created");
         // HACK: this is really dumb. probably should have an internal bool
-        // just checks if the count equals the default count
-        // it won't equal the default count if it isn't filled
-        return meshes.front().draw_command.count == rect_draw_command.count;
+        // just checks if the vertex_count equals the default vertex_count
+        // it won't equal the default vertex_count if it isn't filled
+        return meshes.front().draw_command.vertex_count == rect_draw_command.vertex_count;
     }
 };
 

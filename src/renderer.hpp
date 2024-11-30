@@ -41,6 +41,8 @@ public:
         Shader basic_textured_mesh;
         Shader light_mesh;
         Shader light_textured_mesh;
+
+        Shader skybox;
         Shader depth;
 
         // TODO: lighting shaders
@@ -109,6 +111,8 @@ private:
     uint _square_pyramids_vao;
     uint _square_pyramids_vbo;
     uint _square_pyramids_ebo;
+
+    uint _matrices_ubo;
 
     static constexpr std::array<float, 32> _rect_vertices = {
         // positions              // normals           // texture coords
@@ -202,6 +206,7 @@ private:
 
     void init_vbos();
     void init_vaos();
+    void init_ubos();
     void update_vbos();
 
     void init_shaders();
@@ -211,5 +216,9 @@ private:
     void render_lines();
     void render_game_objects();
     void render_lights();
+    // NOTE: this function changes glDepthFunc every frame if a skybox
+    // is set should probably just go back to the previous
+    // depth function instead
+    void render_skybox(Skybox& skybox);
 };
 

@@ -70,7 +70,7 @@ void Mesh::create_buffers() {
 
     draw_command.type = DrawCommandType::DRAW_ELEMENTS;
     draw_command.mode = DrawCommandMode::TRIANGLES;
-    draw_command.count = indices.size();
+    draw_command.vertex_count = indices.size();
 
     _buffers_created = true;
 }

@@ -20,7 +20,7 @@ public:
         meshes.emplace_back();
         return meshes.back();
     }
-    uint mesh_count() {
+    uint mesh_count() const {
         return meshes.size();
     }
 
@@ -28,12 +28,14 @@ public:
     // from a Model keep this. only sets vaos
     // doesn't copy mesh data. so don't delete the original
     // vao / mesh
-    void load_mesh_data(const Model& model);
+    void load_mesh_data(const std::vector<Mesh>& meshes);
+    void load_texture_data(const std::vector<Texture2D>& textures);
+    void load_model_data(const Model& model);
 
     void set_id(uint id) {
         _id = id;
     }
-    uint get_id() {
+    uint get_id() const {
         return _id;
     }
 

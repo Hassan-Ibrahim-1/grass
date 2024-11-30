@@ -7,8 +7,11 @@ layout (location = 1) in vec3 a_normal;
 out vec3 normal;
 out vec3 frag_pos; // fragment position
 
-uniform mat4 projection;
-uniform mat4 view;
+layout (std140) uniform Matrices {
+    mat4 projection;
+    mat4 view;
+};
+
 uniform mat4 model; // converts vectors to world_space
 uniform mat3 inverse_model;
 

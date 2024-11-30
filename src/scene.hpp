@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "game_object.hpp"
 #include "material.hpp"
+#include "skybox.hpp"
 #include "transform.hpp"
 #include "light.hpp"
 
@@ -36,11 +37,9 @@ public:
     void add_primitive(Rect* rect);
     void add_primitive(Circle* circle);
     void add_primitive(Sphere* sphere);
-
     uint game_object_count() const {
         return game_objects.size();
     }
-
     // NOTE: this frees the game object
     // Make sure this gameobject has been added to scene before
     // otherwise nothing will happen
@@ -51,16 +50,17 @@ public:
     PointLight& create_point_light();
     SpotLight& create_spot_light();
     DirLight& create_dir_light();
-
     void add_point_light(PointLight* point_light);
     void add_spot_light(SpotLight* spot_light);
     void add_directional_light(DirLight* dir_light);
-
     size_t point_lights_used() const;
     size_t spot_lights_used() const;
     size_t dir_lights_used() const;
-
     bool has_lights() const;
+
+    void set_skybox(const std::array<std::string, 6>& skybox_textures);
+    Skybox& get_skybox() { return _skybox; };
+    bool has_skybox() const { return _skybox.loaded(); }
 
     void clear_game_objects();
     void clear_lights();
@@ -70,6 +70,8 @@ private:
     size_t _n_point_lights = 0;
     size_t _n_spot_lights = 0;
     size_t _n_dir_lights = 0;
+
+    Skybox _skybox;
 
     // NOTE: super simple rn. just increments a counter and returns the result
     uint generate_id();

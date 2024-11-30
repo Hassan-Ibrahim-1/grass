@@ -23,7 +23,7 @@ public:
 
     // automatically loads texture
     Texture2D(const std::string& path,
-              TextureType type,
+              TextureType type = TextureType::DIFFUSE,
               bool default_texture_sampling = true);
 
     // store an already loaded texture

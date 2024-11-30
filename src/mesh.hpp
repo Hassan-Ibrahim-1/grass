@@ -18,7 +18,6 @@ public:
     ~Mesh();
     
     uint vao() const;
-    uint vbo() const { return _vbo; }
     // NOTE: returns whether the mesh is ready to render
     // if not call Mesh::create_buffers
     bool ready() const;

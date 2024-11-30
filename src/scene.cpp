@@ -5,7 +5,6 @@
 
 Scene::~Scene() {
     clear_game_objects();
-    clear_lights();
 }
 
 GameObject& Scene::create_game_object(Transform transform, Material material) {
@@ -165,5 +164,13 @@ int Scene::get_game_object_index(int obj_id) {
         }
     }
     return -1;
+}
+
+void Scene::set_skybox(const std::array<std::string, 6>& skybox_textures) {
+    if (_skybox.loaded()) {
+        _skybox.delete_textures();
+    }
+    _skybox.face_textures = skybox_textures;
+    _skybox.load();
 }
 
