@@ -41,12 +41,12 @@ void main() {
     vec3 position = (a_model * vec4(a_position, 1.0f)).xyz;
     position.x += offset;
 
-    gl_Position = vec4(position, 1);
+    gl_Position = projection * view * vec4(position, 1);
     // gl_Position = vec4(0, 0.1, 0, 1);
 
     frag_pos = vec3(a_model * vec4(a_position, 1.0f));
-    mat3 inverse_model = mat3(a_inverse_model[0], a_inverse_model[1], a_inverse_model[2]);
-    normal = normalize(inverse_model * a_normal);
+    // mat3 inverse_model = mat3(a_inverse_model[0], a_inverse_model[1], a_inverse_model[2]);
+    normal = normalize(mat3(transpose(inverse(a_model)))* a_normal);
 }
 
 
