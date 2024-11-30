@@ -63,9 +63,6 @@ void App::init() {
         0, 3, 4
     };
     grass_mesh.create_buffers();
-    grass_mesh.draw_command.mode = DrawCommandMode::TRIANGLES;
-    grass_mesh.draw_command.type = DrawCommandType::DRAW_ELEMENTS_INSTANCED;
-    grass_mesh.draw_command.instance_count = ngrass;
 
     renderer.add_shader(grass_shader);
 
@@ -106,6 +103,10 @@ Transform& App::create_grass_blade() {
 
 
 void App::render_grass() {
+    grass_mesh.draw_command.mode = DrawCommandMode::TRIANGLES;
+    grass_mesh.draw_command.type = DrawCommandType::DRAW_ELEMENTS_INSTANCED;
+    grass_mesh.draw_command.instance_count = ngrass;
+
     grass_shader.use();
     renderer.send_light_data(grass_shader);
     grass_shader.set_mat4("projection", camera.get_perspective_matrix());
@@ -226,7 +227,7 @@ glm::vec3 App::random_point_on_ground() {
     float end_x = ground.transform.position.x + (ground.transform.scale.x / 2);
     float end_z = ground.transform.position.z - (ground.transform.scale.z / 2);
 
-    static constexpr float constraint = 2;
+    static constexpr float constraint = 1;
 
     start_x /= constraint;
     end_x /= constraint;
