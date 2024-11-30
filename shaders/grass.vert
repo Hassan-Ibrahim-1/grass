@@ -13,7 +13,7 @@ out vec3 frag_pos; // fragment position
 // };
 
 // at most N grass
-#define MAX_GRASS 20
+#define MAX_GRASS 100
 uniform mat4 models[MAX_GRASS];
 uniform mat3 inverse_models[MAX_GRASS];
 uniform mat4 projection;
@@ -26,7 +26,7 @@ float random2d(vec2 coord) {
 }
 
 void main() {
-    const float mult = 0.022;
+    const float mult = 0.22;
     float offset = 0;
     // Only offset position if it is the middle 2 vertices
     if (a_position.y >= 0.5f) {
