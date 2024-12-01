@@ -32,7 +32,8 @@ void main() {
     float offset = 0;
     // Only offset position if it is the middle 2 vertices
     if (a_position.y >= 0.5f) {
-        offset = mult * cos(time);
+        float random = random2d(a_position.xy);
+        offset = mult * sin(time) - (a_position.x * 0.1 + random * 0.1);
         if (a_position.y == 1.0f) {
             offset = ((offset + 0.5) + (offset - 0.5));
         }

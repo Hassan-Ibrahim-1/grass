@@ -11,9 +11,9 @@ void App::init() {
     camera.transform.position = {0, 5, 7};
 
     ground.transform.scale = {
-        70,
+        100,
         1,
-        70
+        100
     };
     scene.add_primitive(&ground);
     ground.hidden = false;

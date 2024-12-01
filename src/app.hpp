@@ -22,8 +22,6 @@ public:
     float mult = 0.0220f;
 
     Shader grass_shader;
-
-    /*GameObject& grass = *new GameObject;*/
     
     glm::mat4& create_grass_blade();
     void render_grass();
