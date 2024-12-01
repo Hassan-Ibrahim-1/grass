@@ -10,7 +10,7 @@ public:
     uint instance_vbo = 0;
     // TODO: make this an array
 
-    static constexpr uint ngrass = 100000;
+    static constexpr uint ngrass = 1000000;
     std::vector<glm::mat4> grass_mats;
     uint current_grass = 0;
 

@@ -9,19 +9,28 @@
 void App::init() {
     camera.velocity = 25;
     camera.transform.position = {0, 5, 7};
+    camera.far = 500;
 
+    scene.set_skybox({
+        "textures/skybox/right.jpg",
+        "textures/skybox/left.jpg",
+        "textures/skybox/top.jpg",
+        "textures/skybox/bottom.jpg",
+        "textures/skybox/front.jpg",
+        "textures/skybox/back.jpg"
+    });
     ground.transform.scale = {
-        100,
+        200,
         1,
-        100
+        200
     };
     scene.add_primitive(&ground);
     ground.hidden = false;
 
-    light.constant = 0.659;
-    light.linear = 0.459;
-    light.quadratic = 0.001;
-    light.position.y = 13;
+    light.constant = 0.506;
+    light.linear = 0.0;
+    light.quadratic = 0.002;
+    light.position.y = 37.4;
     scene.add_point_light(&light);
 
     grass_shader.load(
