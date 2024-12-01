@@ -6,12 +6,14 @@ public:
     void update() override;
     void cleanup() override;
 
-    uint ngrass = 100000;
     Mesh grass_mesh;
     uint instance_vbo = 0;
-    uint instance_inverse_model_vbo = 0;
     // TODO: make this an array
-    std::vector<Transform> grass_transforms;
+
+    static constexpr uint ngrass = 100000;
+    std::vector<glm::mat4> grass_mats;
+    uint current_grass = 0;
+
     Color grass_color = Color(0, 255, 141);
 
     Cube& ground = *new Cube;
@@ -23,12 +25,10 @@ public:
 
     /*GameObject& grass = *new GameObject;*/
     
-    Transform& create_grass_blade();
-    void update_grass();
+    glm::mat4& create_grass_blade();
     void render_grass();
     void create_random_grass();
     void init_instance_vbo();
-    void send_transform_data();
     glm::vec3 random_point_on_ground();
 };
 
